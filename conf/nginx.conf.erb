@@ -130,7 +130,7 @@ http {
       fastcgi_param   HTTPS $my_https if_not_empty;
       fastcgi_pass    php_fpm;
       fastcgi_param   SCRIPT_FILENAME $document_root$fastcgi_script_name;
-      fastcgi_param   APP_ENV sdltesting;
+      fastcgi_param   APP_ENV heroku;
     }
   }
 }
