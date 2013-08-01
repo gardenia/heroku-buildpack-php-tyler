@@ -31,29 +31,52 @@ http {
     server unix:/tmp/php-fpm.socket;
   }
 
-  root              /app/;
+  root              /app/www/app/webroot;
   index             index.php index.html index.htm;
 
   server {
     listen            <%= ENV['PORT'] %>;
     server_name       _;
 
-    # Some basic cache-control for static files to be sent to the browser
-    location ~* \.(?:ico|css|js|gif|jpeg|jpg|png)$ {
-      expires         max;
-      add_header      Pragma public;
-      add_header      Cache-Control "public, must-revalidate, proxy-revalidate";
+    # rewrite rules for cakephp
+    location / {
+        index  index.php index.html;
+
+        # If the file exists as a static file serve it 
+        # directly without running all
+        # the other rewite tests on it
+        if (-f $request_filename) {
+            break;
+        }
+        if (!-f $request_filename) {
+            rewrite ^/(.+)$ /index.php?url=$1 last;
+            break;
+        }
+    }
+
+    location ~* \favicon.ico$ {
+        expires 6m;
+    }
+
+    location ~ ^/img/ {
+        expires 7d;
+    }
+
+    location ~ ^/fonts/ {
+        expires 7d;
+    }
+
+    location ~ ^/css/ {
+        expires 12h;
+    }
+
+    location ~ ^/js/ {
+        expires 12h;
     }
 
     # Deny hidden files (.htaccess, .htpasswd, .DS_Store).
     location ~ /\. {
       deny            all;
-      access_log      off;
-      log_not_found   off;
-    }
-
-    # Deny /favicon.ico
-    location = /favicon.ico {
       access_log      off;
       log_not_found   off;
     }
@@ -66,17 +89,17 @@ http {
     }
 
     # Status. /status.html uses /status
-    location ~ ^/(status|ping)$ {
-      include         fastcgi_params;
-      fastcgi_param   HTTPS $my_https if_not_empty;
-      fastcgi_pass    php_fpm;
-      fastcgi_param   SCRIPT_FILENAME $document_root$fastcgi_script_name;
-    }
+    #location ~ ^/(status|ping)$ {
+    #  include         fastcgi_params;
+    #  fastcgi_param   HTTPS $my_https if_not_empty;
+    #  fastcgi_pass    php_fpm;
+    #  fastcgi_param   SCRIPT_FILENAME $document_root$fastcgi_script_name;
+    #}
 
-    location /server-status {
-      stub_status on;
-      access_log   off;
-    }
+    #location /server-status {
+    #  stub_status on;
+    #  access_log   off;
+    #}
 
     #location / {
     #  # wordpress fancy rewrites
@@ -107,6 +130,7 @@ http {
       fastcgi_param   HTTPS $my_https if_not_empty;
       fastcgi_pass    php_fpm;
       fastcgi_param   SCRIPT_FILENAME $document_root$fastcgi_script_name;
+      fastcgi_param   APP_ENV production;
     }
   }
 }
