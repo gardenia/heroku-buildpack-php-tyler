@@ -14,7 +14,7 @@ S3_BUCKET=heroku-buildpack-php-sdl
 # END CONFIG
 
 #
-S3_URL="https://s3.amazonaws.com/${S3_BUCKET}"
+S3_URL="https://s3-eu-west-1.amazonaws.com/${S3_BUCKET}"
 
 MANIFEST_FILE="manifest.md5sum"
 NGINX_FILE="nginx-${NGINX_VERSION}-heroku.tar.gz"
